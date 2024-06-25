@@ -2,8 +2,6 @@
 
 WebDiver is a Python-based website crawler designed for extracting comprehensive information from web pages. It facilitates tasks such as web analysis, Open Source Intelligence (OSINT) gathering, competitive analysis, and more.
 
-## Detailed Description
-
 ### Features
 
 - **Data Extraction**: WebDiver systematically retrieves data from websites, including titles, descriptions, internal links, and external links. This information is crucial for understanding the structure and content of a website.
