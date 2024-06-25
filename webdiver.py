@@ -166,7 +166,7 @@ if __name__ == "__main__":
     all_external_links = extract_external_links(visited_urls)
 
     # Print all accumulated external links after crawling all pages
-    print_header("All External Links Found:")
+    print_header("External Links Found:")
     if all_external_links:
         for link, sources in all_external_links.items():
             print(f"{link} (Found in: {', '.join(sources)})")
