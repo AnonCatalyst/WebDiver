@@ -23,6 +23,8 @@ WebDiver is a Python-based website crawler designed for extracting comprehensive
    - Navigate to the directory containing `webdiver.py` using a terminal or command prompt.
    - Execute the script by running:
      ```bash
+     git clone https://github.com/AnonCatalyst/WebDiver && cd WebDiver
+     pip install -r requirements.txt --break-system-packages
      python3 webdiver.py
      ```
      Replace `python3` with `python` if `python3` command is not recognized on your system.
