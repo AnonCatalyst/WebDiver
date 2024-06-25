@@ -151,6 +151,7 @@ if __name__ == "__main__":
         print_divider()
         
         print("☆ Internal links:")
+        print_divider()
         for link in current_page['internal_links']:
             print(link)
 
