@@ -130,14 +130,14 @@ def print_header(text):
 
 if __name__ == "__main__":
     # Welcome message and input for target URL
-    print_header("Welcome to WebDiver - Website Crawler")
-    target_url = input("Enter target URL: ").strip()
+    print_header("♤ Welcome to WebDiver - Website Crawler")
+    target_url = input("》Enter target URL: ").strip()
     print_divider()
 
     crawl_results = []
 
     # Crawl the initial target URL
-    print(f"Crawling {target_url}...")
+    print(f"■ Crawling {target_url}...")
     result = crawl_website(target_url)
     if result:
         crawl_results.append(result)
@@ -145,12 +145,12 @@ if __name__ == "__main__":
     # Recursively crawl internal links
     while crawl_results:
         current_page = crawl_results.pop(0)
-        print(f"URL: {current_page['url']}")
-        print(f"Title: {current_page['title']}")
-        print(f"Description: {current_page['description']}")
+        print(f"-URL: {current_page['url']}")
+        print(f"-Title: {current_page['title']}")
+        print(f"-Description: {current_page['description']}")
         print_divider()
         
-        print("Internal links:")
+        print("☆ Internal links:")
         for link in current_page['internal_links']:
             print(link)
 
@@ -166,9 +166,9 @@ if __name__ == "__main__":
     all_external_links = extract_external_links(visited_urls)
 
     # Print all accumulated external links after crawling all pages
-    print_header("External Links Found:")
+    print_header("☆ External Links Found:")
     if all_external_links:
         for link, sources in all_external_links.items():
-            print(f"{link} (Found in: {', '.join(sources)})")
+            print(f"•{link} (Found in: {', '.join(sources)})")
     else:
         print("No external links found.")
