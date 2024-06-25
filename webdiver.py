@@ -4,11 +4,11 @@ from urllib.parse import urlparse, urljoin
 from bs4 import BeautifulSoup
 import time
 import concurrent.futures
-from tqdm import tqdm  
+from tqdm import tqdm
 
 # Global variables to track visited URLs and external links
 visited_urls = set()
-all_external_links = set()
+all_external_links = {}
 visited_external_links = set()
 
 def get_html(url, retries=3):
@@ -77,8 +77,11 @@ def crawl_website(url):
         title, description = get_title_and_description(html)
         internal_links, external_links = get_links(html, url)
         
-        # Update global external links set
-        all_external_links.update(external_links)
+        # Update global external links set with source URL
+        for ext_link in external_links:
+            if ext_link not in all_external_links:
+                all_external_links[ext_link] = []
+            all_external_links[ext_link].append(url)
         
         return {
             'url': url,
@@ -101,11 +104,13 @@ def extract_external_links(urls):
                 url = future_to_url[future]
                 try:
                     internal_links, ext_links = future.result()
-                    all_external_links.update(ext_links)  # Update external links globally
-                    
+                    # Update external links globally with source URL
+                    for ext_link in ext_links:
+                        if ext_link not in all_external_links:
+                            all_external_links[ext_link] = []
+                        all_external_links[ext_link].append(url)
                 except Exception as e:
                     print(f"Exception occurred for {url}: {e}")
-                
                 finally:
                     # Update tqdm progress bar after each task completes
                     pbar.update(1)
@@ -163,7 +168,7 @@ if __name__ == "__main__":
     # Print all accumulated external links after crawling all pages
     print_header("All External Links Found:")
     if all_external_links:
-        for link in all_external_links:
-            print(link)
+        for link, sources in all_external_links.items():
+            print(f"{link} (Found in: {', '.join(sources)})")
     else:
         print("No external links found.")
