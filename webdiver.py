@@ -7,6 +7,10 @@ from tqdm.asyncio import tqdm
 import os
 import sys
 
+# Import core.py from src directory
+sys.path.append(os.path.join(os.path.dirname(__file__), 'src'))
+import core
+
 # Global variables to track visited URLs and external links
 visited_urls = set()
 all_external_links = {}
