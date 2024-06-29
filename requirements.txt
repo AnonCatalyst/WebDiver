@@ -1,4 +1,5 @@
-beautifulsoup4
-requests
-fake-useragent
+colorama
+bs4
 tqdm
+aiohttp
+requests
