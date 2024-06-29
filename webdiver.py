@@ -1,16 +1,16 @@
 import asyncio
 from urllib.parse import urlparse, urljoin
 from bs4 import BeautifulSoup
-from tqdm.asyncio import tqdm_asyncio
+from tqdm import tqdm  
 from aiohttp import ClientSession
 from colorama import init, Fore, Style
-import src.core  # Assuming src.core is your module
+import src.core  
 
 # Initialize colorama for colored terminal output
 init(autoreset=True)
 
 async def fetch_html(url, session, retries=3):
-    """Fetch HTML content from a URL asynchronously."""
+    """Fetch HTML content from a URL asynchronously with retries."""
     try:
         async with session.get(url) as response:
             response.raise_for_status()
@@ -20,12 +20,13 @@ async def fetch_html(url, session, retries=3):
             await asyncio.sleep(2)
             return await fetch_html(url, session, retries - 1)
         else:
+            print(Fore.RED + f"Error fetching {url}: {e}")
             return None
 
 def get_links(html, base_url):
     """Extract internal and external links from HTML."""
     try:
-        soup = BeautifulSoup(html, 'html.parser')
+        soup = BeautifulSoup(html, 'html.parser')  # Use 'html.parser' for BeautifulSoup
         internal_links = set()
         external_links = set()
         parsed_base_url = urlparse(base_url)
@@ -44,6 +45,7 @@ def get_links(html, base_url):
 
         return internal_links, external_links
     except Exception as e:
+        print(Fore.RED + f"Error parsing links from {base_url}: {e}")
         return set(), set()
 
 async def crawl_website(url, session, visited_urls, all_external_links):
@@ -54,11 +56,11 @@ async def crawl_website(url, session, visited_urls, all_external_links):
         
         visited_urls.add(url)
         
-        async with session.get(url) as response:
-            response.raise_for_status()
-            html = await response.text()
-            
-        soup = BeautifulSoup(html, 'html.parser')
+        html = await fetch_html(url, session)
+        if not html:
+            return None
+        
+        soup = BeautifulSoup(html, 'html.parser')  # Use 'html.parser' for BeautifulSoup
         title = soup.title.string.strip() if soup.title else "No title"
         meta_desc = soup.find('meta', attrs={'name': 'description'})
         description = meta_desc.get('content').strip() if meta_desc else "No description"
@@ -72,18 +74,21 @@ async def crawl_website(url, session, visited_urls, all_external_links):
             'description': description,
             'internal_links': internal_links
         }
-    
     except Exception as e:
-        print(Fore.RED + f"An error occurred while crawling {url}: {e}")
+        print(Fore.RED + f"Error crawling {url}: {e}")
         return None
 
 async def extract_external_links(urls):
-    """Extract external links from a list of URLs."""
+    """Extract external links from a list of URLs with live loading."""
     all_external_links = set()
     try:
         async with ClientSession() as session:
-            for url in tqdm_asyncio(urls, desc=Fore.CYAN + "Extracting External Links", unit=Fore.CYAN + " page"):
-                html = await fetch_html(url, session)
+            tasks = []
+            for url in urls:
+                tasks.append(fetch_html(url, session))
+            
+            for html in tqdm(asyncio.as_completed(tasks), total=len(tasks), desc=Fore.CYAN + "Extracting External Links", unit=Fore.CYAN + " page"):
+                html = await html
                 if html:
                     soup = BeautifulSoup(html, 'html.parser')
                     base_url = urlparse(url)
@@ -93,12 +98,11 @@ async def extract_external_links(urls):
                         if parsed_url.scheme in ('http', 'https') and parsed_url.netloc != base_url.netloc:
                             all_external_links.add(absolute_url)
     except Exception as e:
-        print(Fore.RED + f"An error occurred while extracting external links: {e}")
+        print(Fore.RED + f"Error extracting external links: {e}")
     
     return all_external_links
 
 async def main():
-    """Main entry point of the crawler."""
     try:
         visited_urls = set()
         all_external_links = set()
