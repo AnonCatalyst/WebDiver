@@ -1,32 +1,32 @@
-import requests
+import asyncio
+import aiohttp
 from fake_useragent import UserAgent
 from urllib.parse import urlparse, urljoin
 from bs4 import BeautifulSoup
-import time
-import concurrent.futures
-from tqdm import tqdm
+from tqdm.asyncio import tqdm
+import os
+import sys
 
 # Global variables to track visited URLs and external links
 visited_urls = set()
 all_external_links = {}
 visited_external_links = set()
 
-def get_html(url, retries=3):
+async def fetch_html(url, session, retries=3):
     """Fetch HTML content from a URL with retries in case of failure."""
     try:
         ua = UserAgent()
         headers = {'User-Agent': ua.random}
         
-        response = requests.get(url, headers=headers)
-        response.raise_for_status()  # Raise HTTPError for bad responses
-        
-        return response.text
-    except requests.exceptions.RequestException as e:
+        async with session.get(url, headers=headers) as response:
+            response.raise_for_status()  # Raise HTTPError for bad responses
+            return await response.text()
+    except aiohttp.ClientError as e:
         print(f"Error fetching {url}: {e}")
         if retries > 0:
             print(f"Retrying {retries} more times...")
-            time.sleep(5)  # Adjust the sleep time as per your needs
-            return get_html(url, retries - 1)
+            await asyncio.sleep(2)  # Adjust the sleep time as per your needs
+            return await fetch_html(url, session, retries - 1)
         else:
             print("Max retries exceeded. Skipping.")
             return None
@@ -62,7 +62,7 @@ def get_links(html, base_url):
 
     return internal_links, external_links
 
-def crawl_website(url):
+async def crawl_website(url, session):
     """Crawl a website starting from the given URL."""
     global visited_urls, all_external_links
     
@@ -71,7 +71,7 @@ def crawl_website(url):
         return None
     
     # Fetch HTML content of the URL
-    html = get_html(url)
+    html = await fetch_html(url, session)
     if html:
         visited_urls.add(url)
         title, description = get_title_and_description(html)
@@ -91,31 +91,25 @@ def crawl_website(url):
         }
     return None
 
-def extract_external_links(urls):
+async def extract_external_links(urls):
     """Extract external links from a list of URLs using threading and tqdm for progress."""
     global all_external_links
     
-    # Initialize tqdm progress bar
-    with tqdm(total=len(urls), desc="Extracting External Links", unit=" page", leave=True) as pbar:
-        with concurrent.futures.ThreadPoolExecutor(max_workers=10) as executor:
-            # Submit tasks for each URL to fetch and extract external links
-            future_to_url = {executor.submit(get_links, get_html(url), url): url for url in urls}
-            for future in concurrent.futures.as_completed(future_to_url):
-                url = future_to_url[future]
-                try:
-                    internal_links, ext_links = future.result()
+    async with aiohttp.ClientSession() as session:
+        # Initialize tqdm progress bar
+        async for url in tqdm(urls, desc="Extracting External Links", unit=" page"):
+            try:
+                html = await fetch_html(url, session)
+                if html:
+                    _, ext_links = get_links(html, url)
                     # Update external links globally with source URL
                     for ext_link in ext_links:
                         if ext_link not in all_external_links:
                             all_external_links[ext_link] = []
                         all_external_links[ext_link].append(url)
-                except Exception as e:
-                    print(f"Exception occurred for {url}: {e}")
-                finally:
-                    # Update tqdm progress bar after each task completes
-                    pbar.update(1)
-                    pbar.set_postfix(external_links=len(all_external_links))
-    
+            except Exception as e:
+                print(f"Exception occurred for {url}: {e}")
+
     return all_external_links
 
 def print_divider():
@@ -128,48 +122,55 @@ def print_header(text):
     print(text)
     print_divider()
 
-if __name__ == "__main__":
+async def main():
     # Welcome message and input for target URL
     print_header("♤ Welcome to WebDiver - Website Crawler")
     target_url = input("》Enter target URL: ").strip()
     print_divider()
 
+    # Execute core.py with the target URL
+    core.main(target_url)
+
     crawl_results = []
 
-    # Crawl the initial target URL
-    print(f"■ Crawling {target_url}...")
-    result = crawl_website(target_url)
-    if result:
-        crawl_results.append(result)
+    async with aiohttp.ClientSession() as session:
+        # Crawl the initial target URL
+        print(f"■ Crawling {target_url}...")
+        result = await crawl_website(target_url, session)
+        if result:
+            crawl_results.append(result)
 
-    # Recursively crawl internal links
-    while crawl_results:
-        current_page = crawl_results.pop(0)
-        print(f"-URL: {current_page['url']}")
-        print(f"-Title: {current_page['title']}")
-        print(f"-Description: {current_page['description']}")
-        print_divider()
-        
-        print("☆ Internal links:")
-        print_divider()
-        for link in current_page['internal_links']:
-            print(link)
+        # Recursively crawl internal links
+        while crawl_results:
+            current_page = crawl_results.pop(0)
+            print(f"- URL: {current_page['url']}")
+            print(f"- Title: {current_page['title']}")
+            print(f"- Description: {current_page['description']}")
+            print_divider()
+            
+            print("☆ Internal links:")
+            print_divider()
+            for link in current_page['internal_links']:
+                print(link)
 
-        # Add internal links to crawl_results if not visited
-        for link in current_page['internal_links']:
-            if link not in visited_urls:
-                visited_urls.add(link)
-                result = crawl_website(link)
-                if result:
-                    crawl_results.append(result)
+            # Add internal links to crawl_results if not visited
+            for link in current_page['internal_links']:
+                if link not in visited_urls:
+                    visited_urls.add(link)
+                    result = await crawl_website(link, session)
+                    if result:
+                        crawl_results.append(result)
 
     # Extract external links from all visited pages using threading and tqdm
-    all_external_links = extract_external_links(visited_urls)
+    all_external_links = await extract_external_links(visited_urls)
 
     # Print all accumulated external links after crawling all pages
     print_header("☆ External Links Found:")
     if all_external_links:
         for link, sources in all_external_links.items():
-            print(f"•{link} (Found in: {', '.join(sources)})")
+            print(f"• {link} (Found in: {', '.join(sources)})")
     else:
         print("No external links found.")
+
+if __name__ == "__main__":
+    asyncio.run(main())
