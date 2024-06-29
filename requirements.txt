@@ -1,5 +1,6 @@
-colorama
-bs4
-tqdm
+asyncio
 aiohttp
-requests
+beautifulsoup4
+tqdm
+colorama
+
