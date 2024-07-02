@@ -8,6 +8,7 @@ WebDiver is a Python-based website crawler designed for extracting comprehensive
 - IP and Website detailed information
 - META extractions for more detailed output about the website
 - Extracting usernames from external links
+- Integrate with Odinova Digital Tiger
 
 ### Features
 
