@@ -14,11 +14,6 @@ WebDiver is a Python-based website crawler designed for extracting comprehensive
 
 - **OSINT Capabilities**: Supports OSINT activities by gathering and analyzing publicly available data from websites, aiding in research, investigation, and intelligence gathering.
 
-
-### Prerequisites
-
-- Ensure Python 3 is installed on your system. If not, download it from [python.org](https://www.python.org/downloads/) and follow the installation instructions.
-
 ### Usage Instructions
 
 1. **Prerequisites**:
