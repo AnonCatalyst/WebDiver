@@ -6,13 +6,18 @@ WebDiver is a Python-based website crawler designed for extracting comprehensive
 
 - **Data Extraction**: WebDiver systematically retrieves data from websites, including titles, descriptions, internal links, and external links. This information is crucial for understanding the structure and content of a website.
 
-- **Link Analysis**: It identifies relationships between different web pages through internal and external links, providing insights into information flow and dependencies within a site.
+- **Link Analysis**: Identifies relationships between different web pages through internal and external links, providing insights into information flow and dependencies within a site.
 
-- **Metadata Retrieval**: Extracts metadata such as titles and descriptions, which are indicative of a website's focus, content, and possibly its owners or creators.
+- **Metadata Retrieval**: Extracts metadata such as titles, descriptions, and other meta tags, which are indicative of a website's focus, content, and possibly its owners or creators.
+
+- **Email Extraction**: Finds and extracts email addresses from web pages, aiding in contact discovery or further analysis.
+
+- **IP Geolocation**: Fetches IP geolocation information for the target website, providing insights into its hosting location and potentially associated entities.
+
+- **Error Handling and Logging**: Implements robust error handling and logging mechanisms to track and manage encountered issues during crawling.
 
 - **Progress Monitoring**: Utilizes the `tqdm` library to display a progress bar during the extraction of external links, offering real-time feedback on task completion.
 
-- **OSINT Capabilities**: Supports OSINT activities by gathering and analyzing publicly available data from websites, aiding in research, investigation, and intelligence gathering.
 
 ### Usage Instructions
 
