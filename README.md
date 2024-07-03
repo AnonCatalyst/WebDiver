@@ -12,8 +12,6 @@ WebDiver is a Python-based website crawler designed for extracting comprehensive
 
 - **Email Extraction**: Finds and extracts email addresses from web pages, aiding in contact discovery or further analysis.
 
-- **IP Geolocation**: Fetches IP geolocation information for the target website, providing insights into its hosting location and potentially associated entities.
-
 - **Error Handling and Logging**: Implements robust error handling and logging mechanisms to track and manage encountered issues during crawling.
 
 - **Progress Monitoring**: Utilizes the `tqdm` library to display a progress bar during the extraction of external links, offering real-time feedback on task completion.
