@@ -1,6 +1,7 @@
 asyncio
-aiohttp
 beautifulsoup4
+aiohttp
 tqdm
+ipwhois
+fake-useragent
 colorama
-
