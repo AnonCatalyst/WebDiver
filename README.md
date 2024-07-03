@@ -2,14 +2,7 @@
 
 WebDiver is a Python-based website crawler designed for extracting comprehensive information from web pages. It facilitates tasks such as web analysis, Open Source Intelligence (OSINT) gathering, competitive analysis, and more.
 
-
-## TO-DO
-- Extraction of Emails during traversal
-- IP and Website detailed information
-- META extractions for more detailed output about the website
-- Integrate with Odinova Digital Tiger
-
-### Features
+## Features
 
 - **Data Extraction**: WebDiver systematically retrieves data from websites, including titles, descriptions, internal links, and external links. This information is crucial for understanding the structure and content of a website.
 
@@ -20,6 +13,11 @@ WebDiver is a Python-based website crawler designed for extracting comprehensive
 - **Progress Monitoring**: Utilizes the `tqdm` library to display a progress bar during the extraction of external links, offering real-time feedback on task completion.
 
 - **OSINT Capabilities**: Supports OSINT activities by gathering and analyzing publicly available data from websites, aiding in research, investigation, and intelligence gathering.
+
+
+### Prerequisites
+
+- Ensure Python 3 is installed on your system. If not, download it from [python.org](https://www.python.org/downloads/) and follow the installation instructions.
 
 ### Usage Instructions
 
