@@ -8,7 +8,7 @@ from aiohttp import ClientSession, ClientError, ClientResponseError, hdrs
 import logging
 from colorama import init, Fore, Style
 from fake_useragent import UserAgent
-from src.core import get_ip_info  # Import the IP info function from core.py
+from src.core import get_ip_info  
 import json
 
 
