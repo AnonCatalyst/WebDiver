@@ -2,7 +2,7 @@ aiohttp==3.8.1
 async-timeout==4.0.3
 beautifulsoup4==4.10.0
 colorama==0.4.4
-fake-useragent==0.1.12
+fake_useragent==0.1.12
 ipwhois==1.2.0
 jsonschema==4.5.0
 tqdm==4.62.3
