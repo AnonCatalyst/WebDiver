@@ -38,7 +38,7 @@ The integration of `tqdm` provides a visual progress bar during the extraction o
    - Execute the script by running:
      ```bash
      git clone https://github.com/AnonCatalyst/WebDiver && cd WebDiver
-     pip install -r requirements.txt --break-system-packages
+     python3 install.py
      python3 webdiver.py
      ```
      Replace `python3` with `python` if `python3` command is not recognized on your system.
