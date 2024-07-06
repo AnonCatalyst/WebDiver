@@ -8,6 +8,9 @@ from aiohttp import ClientSession, ClientError, ClientResponseError, hdrs
 import logging
 from colorama import init, Fore, Style
 from fake_useragent import UserAgent
+from src.core import get_ip_info  # Import the IP info function from core.py
+import json
+
 
 init(autoreset=True)
 
@@ -18,10 +21,6 @@ file_handler.setLevel(logging.ERROR)  # Set to log only errors
 formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
 file_handler.setFormatter(formatter)
 logger.addHandler(file_handler)
-
-
-
-
 
 async def fetch_html(url, session, retries=3):
     """Fetch HTML content from a URL asynchronously with retries and random user agents."""
@@ -145,7 +144,6 @@ async def crawl_website(url, session, visited_urls, all_external_links, output_d
         internal_links.update(new_internal_links)
         all_external_links.update(new_external_links)
 
-
         # Combine internal and external links for output
         all_links = internal_links.union(external_links)
 
@@ -171,24 +169,33 @@ async def crawl_website(url, session, visited_urls, all_external_links, output_d
         with open(meta_output_file, 'w', encoding='utf-8') as meta_file:
             meta_file.write(f"{Fore.CYAN}Title: {title}\n")
             meta_file.write(f"{Fore.CYAN}URL: {url}\n")
-            meta_file.write(f"{Fore.CYAN}Description: {description}\n\n")
+            #meta_file.write(f"{Fore.CYAN}Description: {description}\n\n")
             meta_file.write(f"{Style.BRIGHT}{Fore.CYAN}☆ Meta Data:\n")
             for key, value in meta_data.items():
                 meta_file.write(f"{Fore.CYAN}  • {key}: {value}\n")
 
-        return {
-            'url': url,
-            'title': title,
-            'description': description,
-            'internal_links': internal_links,
-            'external_links': all_external_links,
-            'emails': all_emails,
-            'meta_data': meta_data 
-        }
+        # Fetch IP information
+        ip_info_str = await get_ip_info(urlparse(url).netloc)  # Await get_ip_info coroutine
+        try:
+            ip_info = json.loads(ip_info_str)  # Parse JSON string to dictionary
+            crawl_results = {
+                'url': url,
+                'title': title,
+                'description': description,
+                'internal_links': internal_links,
+                'external_links': all_external_links,
+                'emails': all_emails,
+                'meta_data': meta_data,
+                'ip_info': ip_info  # Include IP information in crawl results
+            }
+            return crawl_results
+        except json.JSONDecodeError:
+            logger.error(f"Error decoding IP information: {ip_info_str}")
+            return None
+
     except Exception as e:
         logger.error(f"Error crawling {url}: {e}")
         return None
-
 
 async def extract_external_links(urls, session):
     """Extract external links from a list of URLs."""
@@ -211,18 +218,18 @@ async def extract_external_links(urls, session):
                             all_external_links.add((absolute_url, origin_url))
             except Exception as e:
                 logger.error(f"Error extracting external link from {origin_url}: {e}")
+    
     except Exception as e:
         logger.error(f"Error extracting external links: {e}")
     
     return all_external_links
-
 
 async def main():
     try:
         visited_urls = set()
         all_external_links = set()
         
-        print(Style.BRIGHT + Fore.YELLOW + "♤ Welcome to WebDiver - Website Crawler")
+        print(Style.BRIGHT + Fore.YELLOW + "★ Website Crawler")
         target_url = input(Fore.GREEN + "》Enter target URL: ").strip()
         target_url = 'http://' + target_url if not target_url.startswith(('http://', 'https://')) else target_url
         
@@ -234,7 +241,9 @@ async def main():
         async with ClientSession() as session:
             crawl_results = await crawl_website(target_url, session, visited_urls, all_external_links, output_dir)
             if crawl_results:
-                print(Fore.YELLOW + f"~~~ Crawling Result for {crawl_results['url']} ~~~")
+                print(Fore.YELLOW + f"\n{'='*40}")
+                print(f"~~~ Crawling Result for {crawl_results['url']} ~~~")
+                print(f"{'='*40}\n")
                 print(f"{Fore.CYAN}Title: {crawl_results['title']}")
                 print(f"{Fore.CYAN}URL: {crawl_results['url']}")
                 print(f"{Fore.CYAN}Description: {crawl_results['description']}")
@@ -256,6 +265,14 @@ async def main():
                     print(f"\n{Style.BRIGHT}{Fore.YELLOW}Emails Found:")
                     for email in crawl_results['emails']:
                         print(f"{Fore.YELLOW}  • {email}")
+                
+                # Display IP information if available
+                if 'ip_info' in crawl_results:
+                    print(f"\n{Style.BRIGHT}{Fore.BLUE}IP Information:")
+                    for key, value in crawl_results['ip_info'].items():
+                        print(f"{Fore.BLUE}  • {key}: {value}")
+                
+                print(f"\n{'='*40}\n")
             else:
                 print(Fore.RED + "No data crawled or error occurred.")
     except Exception as e:
