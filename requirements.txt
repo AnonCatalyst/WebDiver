@@ -6,3 +6,4 @@ fake_useragent==0.1.12
 ipwhois==1.2.0
 jsonschema==4.5.0
 tqdm==4.66.3
+fake-useragent==0.1.12
