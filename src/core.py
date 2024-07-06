@@ -20,12 +20,7 @@ async def fetch_ip_info(target_url):
             'asn': results.get('asn', ''),
             'asn_cidr': results.get('asn_cidr', ''),
             'asn_country_code': results.get('asn_country_code', ''),
-            'network': results['network']['name'] if 'network' in results else '',
-            'country': results['network']['country'] if 'network' in results else '',
-            'city': results['network'].get('city', ''),
-            'latitude': results['network'].get('latitude', ''),
-            'longitude': results['network'].get('longitude', '')
-            # Add more fields as needed
+            'network': results['network']['name'] if 'network' in results else ''
         }
         
         return ip_info
