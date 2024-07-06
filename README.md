@@ -14,8 +14,11 @@ WebDiver is a Python-based website crawler designed for extracting comprehensive
 
 - **Error Handling and Logging**: Implements robust error handling and logging mechanisms to track and manage encountered issues during crawling.
 
-- **Progress Monitoring**: Utilizes the `tqdm` library to display a progress bar during the extraction of external links, offering real-time feedback on task completion.
+- **IP Information Retrieval**: Fetches and displays IP geolocation information for websites, enhancing the depth of analysis with network-related details.
 
+- **Asynchronous Processing**: Utilizes asyncio for concurrent HTTP requests and data extraction, optimizing performance and efficiency.
+
+- **Progress Monitoring**: Utilizes the `tqdm` library to display a progress bar during the extraction of external links, offering real-time feedback on task completion.
 
 ### Usage Instructions
 
